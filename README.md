@@ -16,10 +16,10 @@ make
 
 This will produce a custom librtlsdr.so.0 in the rtl-sdr/src/ directory.
 
-To compile the coherentrtlsdr executable: `make` or `./run.sh`.
+**To compile the coherentrtlsdr executable:** `make` or `./run.sh`.
 `run.sh` runs make before launching the software.
 
-To use your own rtl-sdr library: Modify the value of the variable `CUSTOM_RTLSDR_LOC` with the absolute or relative path to your preferred librtlsdr.so. 
+**To use your own rtl-sdr library:** Modify the value of the variable `CUSTOM_RTLSDR_LOC` with the absolute or relative path to your preferred librtlsdr.so. 
 
 
 # THE FOLLOWING IS THE README FROM THE ORIGINAL PROJECT:
