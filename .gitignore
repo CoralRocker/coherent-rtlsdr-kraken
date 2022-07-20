@@ -9,5 +9,3 @@ CMakeFiles/
 CMakeCache.txt
 *.cmake
 
-# Don't include the submodule
-rtl-sdr/
