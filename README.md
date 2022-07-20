@@ -1,10 +1,11 @@
 # A Fork of mlaak's coherent-rtlsdr optimized for running the KrakenSDR on the DART-MX8M-Mini SOM.
+## NOTE: This branch has had CMake removed b/c it's yucky to work with for such a small project.
 
 ## Compilation Instructions:
 
 Follow the compilation instructions provided in the original readme (Found at bottom of this readme).
 
-Fetch and compile the rtl-sdr submodule.
+Fetch and compile the rtl-sdr submodule (using CMake).
 
 ```
 git submodule init && git submodule update
@@ -14,8 +15,11 @@ make
 ```
 
 This will produce a custom librtlsdr.so.0 in the rtl-sdr/src/ directory.
-We will use LD_PRELOAD to force the coherent-rtlsdr program to use this librtlsdr.
 
+To compile the coherentrtlsdr executable: `make` or `./run.sh`.
+`run.sh` runs make before launching the software.
+
+To use your own rtl-sdr library: Modify the value of the variable `CUSTOM_RTLSDR_LOC` with the absolute or relative path to your preferred librtlsdr.so. 
 
 
 # THE FOLLOWING IS THE README FROM THE ORIGINAL PROJECT:
