@@ -19,41 +19,34 @@ along with coherent-rtlsdr.  If not, see <https://www.gnu.org/licenses/>.
 #define CREFNOISEH
 
 #include <iostream>
-#include <fstream>
+#include <rtl-sdr.h>
+#include "csdrdevice.h"
 
 class crefnoise{
 private:
-	ofstream fp;
 	bool enabled;
-	
+	crefsdr* dev;
 public:
 	void set_state(bool s){
+		std::cout << "noise set to " << s << std::endl;
 		enabled = s;
 		if (s)
-			fp<<"x"; //enable char
+			rtlsdr_set_bias_tee(dev->dev, 1);
 		else
-			fp<<"o"; //disable char (right now any other than 'x')
+			rtlsdr_set_bias_tee(dev->dev, 0);
 		
-		fp.flush(); //may not send single char immediately unless we flush buffers
 	};
 
 	bool isenabled(){
 		return enabled;
 	}
 
-	crefnoise(std::string dev){
-		fp.open(dev.data());
-		if (!fp.good())
-			cout<<"Error opening reference noise control '" << dev << endl;
-		else{
-			enabled = true;
-			fp<<"x";
-			fp.flush();
-		}
+	crefnoise(crefsdr* dev){
+		this->dev = dev;
 
 	};
 	~crefnoise(){
-		fp.close();
+		
 	};
 };
 #endif

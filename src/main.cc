@@ -164,7 +164,7 @@ int main(int argc, char **argv)
 
 	int nfft = 8;
 
-	cl_ops   ops = {"M REF",false,2048000,uint32_t(1024e6),8,1<<14,4,500,500,false,"",false,false};
+	cl_ops   ops = {"1000",false,1024000,uint32_t(1626e6),8,1<<14,4,500,500,false,"",false,false};
 	ops.ndev = crtlsdr::get_device_count();
 	cout << to_string(ops.ndev) << " devices found." << endl;
 	parsecommandline(&ops,argc,argv);
@@ -180,7 +180,6 @@ int main(int argc, char **argv)
 
 	{
 		barrier *startbarrier;
-		crefnoise * refnoise = new crefnoise("/dev/ttyACM0");
 
 		//redirect stderr stream
 		std::stringstream buffer;
@@ -221,6 +220,8 @@ int main(int argc, char **argv)
 
 		crefsdr* ref_dev = new crefsdr(ops.asyncbufn,ops.blocksize,ops.fs,ops.fc);
 		cout << "opening reference device" <<endl;
+		
+		crefnoise * refnoise = new crefnoise(ref_dev);
 
 		if (ref_dev->open(ops.refname)){
 			cout <<"could not open reference, serial number:'" << ops.refname <<"'"<<endl;
@@ -273,6 +274,8 @@ int main(int argc, char **argv)
 		coherent.start();
 		
 		cout << "entering main loop" <<endl;
+		
+		refnoise->set_state(1);
 		
 		while(!exit_all){
 			cpacketize::send(); //main thread just waits on data and publishes when available.

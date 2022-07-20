@@ -196,6 +196,7 @@ public:
 
 
 class crtlsdr: public csdrdevice{
+public:
 	rtlsdr_dev_t	*dev;
 	uint32_t	 	devnum;			//rtlsdr device params
 	
