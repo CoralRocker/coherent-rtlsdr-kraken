@@ -1,4 +1,9 @@
-# coherent-rtlsdr, reworked synchronization algorithm
+
+
+
+# THE FOLLOWING IS THE README FROM THE ORIGINAL PROJECT:
+
+### coherent-rtlsdr, reworked synchronization algorithm
 
 Mostly the same requirements as in my previous coherentsdr proof-of-concept. One added dependency, GNU Readline, for the shell. Some unworking features: adding and deleting receivers during runtime, application does not always exit cleanly. 
 

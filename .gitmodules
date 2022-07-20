@@ -1,3 +1,6 @@
 [submodule "refnoisefirmware/libopencm3"]
 	path = refnoisefirmware/libopencm3
 	url = https://github.com/libopencm3/libopencm3
+[submodule "rtl-sdr"]
+	path = rtl-sdr
+	url = git@github.com:tejeez/rtl-sdr
