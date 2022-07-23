@@ -4,11 +4,16 @@ build/
 *.out
 *.zip
 *.m~
+*.bin
+
 # ignore CMake files
 CMakeFiles/
 CMakeCache.txt
 *.cmake
 
+# Coding tag files
+.ycm_extra_conf.py # Extra config for YouCompleteMe
 
 # Executables
 coherentrtlsdr
+save2bin

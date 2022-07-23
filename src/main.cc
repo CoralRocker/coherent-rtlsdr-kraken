@@ -263,7 +263,6 @@ int main(int argc, char **argv)
 
 		cconsole console(stderr_pipe,ref_dev, &v_devices,refnoise);
 		
-		console.start();
 
 		//sleep(1);
 		
@@ -276,6 +275,7 @@ int main(int argc, char **argv)
 		cout << "entering main loop" <<endl;
 		
 		refnoise->set_state(1);
+		console.start();
 		
 		while(!exit_all){
 			cpacketize::send(); //main thread just waits on data and publishes when available.
