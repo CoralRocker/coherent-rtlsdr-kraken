@@ -28,7 +28,7 @@ along with coherent-rtlsdr.  If not, see <https://www.gnu.org/licenses/>.
 #include <stdio.h>
 #include <fcntl.h>
 
-#include "console.h"
+//#include "console.h"
 #include "csdrdevice.h"
 #include "ccoherent.h"
 #include "cpacketizer.h"
@@ -106,70 +106,70 @@ void usage(void)
 	exit(1);
 }
 
-int parsecommandline(cl_ops *ops, int argc, char **argv){
-	int opt;
-	while ((opt = getopt(argc, argv, "s:b:f:h:n:g:r:I:C:ARq")) != -1) {
-		switch (opt) {
-			case 's':
-					ops->fs=(uint32_t)atof(optarg);
-				break;
-			case 'b':
-					ops->blocksize = (uint32_t)atoi(optarg);
-				break;
-			case 'f':
-					ops->fc=(uint32_t) atof(optarg);
-				break;
-			case 'h':
-					usage();
-				break;
-			case 'n':
-					if ((uint32_t)atoi(optarg)<=ops->ndev)
-						ops->ndev =(uint32_t)atoi(optarg);
-					else
-						cout << "Requested device count higher than devices connected to system " 
-						<< to_string(ops->ndev) << ", setting ndev=" << to_string(ops->ndev) << endl;  
-				break;
-			case 'g':
-					ops->gain = (uint32_t) atoi(optarg)*10;
-				break;
-			case 'r':
-					ops->refgain = (uint32_t) atoi(optarg)*10;
-				break;
-			case 'I':
-					ops->refname=std::string(optarg);
-				break;
-			case 'C':
-				ops->config_fname = std::string(optarg);
-				ops->use_cfg = true;
-			break;
-			case 'A':
-					ops->agc = true;
-				break;
-			case 'R':
-					ops->no_header = true;
-				break;
-			case 'q':
-					ops->quiet = true;
-				break;
-			default:
-				usage();
-				break;
-		}
-	}
-	return 0;
-};
+// int parsecommandline(cl_ops *ops, int argc, char **argv){
+// 	int opt;
+// 	while ((opt = getopt(argc, argv, "s:b:f:h:n:g:r:I:C:ARq")) != -1) {
+// 		switch (opt) {
+// 			case 's':
+// 					ops->fs=(uint32_t)atof(optarg);
+// 				break;
+// 			case 'b':
+// 					ops->blocksize = (uint32_t)atoi(optarg);
+// 				break;
+// 			case 'f':
+// 					ops->fc=(uint32_t) atof(optarg);
+// 				break;
+// 			case 'h':
+// 					usage();
+// 				break;
+// 			case 'n':
+// 					if ((uint32_t)atoi(optarg)<=ops->ndev)
+// 						ops->ndev =(uint32_t)atoi(optarg);
+// 					else
+// 						cout << "Requested device count higher than devices connected to system " 
+// 						<< to_string(ops->ndev) << ", setting ndev=" << to_string(ops->ndev) << endl;  
+// 				break;
+// 			case 'g':
+// 					ops->gain = (uint32_t) atoi(optarg)*10;
+// 				break;
+// 			case 'r':
+// 					ops->refgain = (uint32_t) atoi(optarg)*10;
+// 				break;
+// 			case 'I':
+// 					ops->refname=std::string(optarg);
+// 				break;
+// 			case 'C':
+// 				ops->config_fname = std::string(optarg);
+// 				ops->use_cfg = true;
+// 			break;
+// 			case 'A':
+// 					ops->agc = true;
+// 				break;
+// 			case 'R':
+// 					ops->no_header = true;
+// 				break;
+// 			case 'q':
+// 					ops->quiet = true;
+// 				break;
+// 			default:
+// 				usage();
+// 				break;
+// 		}
+// 	}
+// 	return 0;
+// };
 
 int main(int argc, char **argv)
 {
 
 	int nfft = 8;
 
-	cl_ops   ops = {"1000",false,1024000,uint32_t(1626e6),8,1<<14,4,500,500,false,"",false,false};
+	cl_ops   ops = {"1000",false,1024000,uint32_t(1626e6),8,1<<18,4,500,500,false,"kraken.cfg",false,false};
 	ops.ndev = crtlsdr::get_device_count();
 	cout << to_string(ops.ndev) << " devices found." << endl;
-	parsecommandline(&ops,argc,argv);
+	// parsecommandline(&ops,argc,argv);
 
-	cout << "ops parsed\n"<< endl;
+	// cout << "ops parsed\n"<< endl;
 	if (ops.no_header)
 		cout << "streaming in raw mode" << endl;
 
@@ -261,7 +261,7 @@ int main(int argc, char **argv)
 		//cpacketize* packetize = new cpacketize(v_devices.size(),ops.blocksize, "tcp://*:5555", false);
 		cpacketize::init("tcp://*:5555",ops.no_header,v_devices.size()+1,ops.blocksize);
 
-		cconsole console(stderr_pipe,ref_dev, &v_devices,refnoise);
+		//cconsole console(stderr_pipe,ref_dev, &v_devices,refnoise);
 		
 
 		//sleep(1);
@@ -275,8 +275,23 @@ int main(int argc, char **argv)
 		cout << "entering main loop" <<endl;
 		
 		refnoise->set_state(1);
-		console.start();
+		// console.start();
+
+		//very ugly
+		bool flag = true;
+		while (flag) {
+			flag = false;
+			for (auto dev : v_devices) {
+				if (!dev->get_synchronized()) {
+					flag = true;
+				}
+			}
+		}
 		
+		refnoise->set_state(0);
+
+		cout << "synchronized" << endl;
+
 		while(!exit_all){
 			cpacketize::send(); //main thread just waits on data and publishes when available.
 		}
@@ -293,8 +308,8 @@ int main(int argc, char **argv)
 			d->request_exit();
 		}
 
-		cout << "stopping console" <<endl;
-		console.request_exit();
+		//cout << "stopping console" <<endl;
+		//console.request_exit();
 
 		//console.join();
 		//v[0].close();
@@ -302,7 +317,7 @@ int main(int argc, char **argv)
 		for (auto d : v_devices)
 			d->close();
 
-		console.join();
+		//console.join();
 
 		if (ops.quiet){
 			std::cerr.rdbuf( old );

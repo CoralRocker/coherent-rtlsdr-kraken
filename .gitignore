@@ -17,3 +17,6 @@ CMakeCache.txt
 # Executables
 coherentrtlsdr
 save2bin
+
+# VSCode
+.vscode

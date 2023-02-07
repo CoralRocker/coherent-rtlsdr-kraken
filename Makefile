@@ -2,9 +2,9 @@
 
 
 # Define Default Options for the compiler and linker
-CXX=g++
-CXXFLAGS=--std=c++20 -Wall -ggdb -pedantic -O0 -I include/ 
-LDFLAGS=-L rtl-sdr/src/  -lm -lpthread -lrtlsdr -lvolk -lfftw3f -lzmq -lreadline
+CXX=arm-poky-linux-gnueabi-g++
+CXXFLAGS=--std=c++17 -Wall -Werror -ggdb -pedantic -O0 -I~/imx7/src/include -L~/imx7/src/lib -march=armv7ve -mfpu=neon -mfloat-abi=hard -mcpu=cortex-a7 --sysroot=/opt/fsl-imx-x11/4.14-sumo/sysroots/cortexa7hf-neon-poky-linux-gnueabi
+LDFLAGS=-lm -lpthread -lrtlsdr -lvolk -lfftw3f -lzmq -lreadline
 
 # Source and Build Directories
 BUILD_DIR := build
