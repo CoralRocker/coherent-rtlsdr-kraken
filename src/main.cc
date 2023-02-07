@@ -277,15 +277,10 @@ int main(int argc, char **argv)
 		refnoise->set_state(1);
 		// console.start();
 
-		//very ugly
-		bool flag = true;
-		while (flag) {
-			flag = false;
-			for (auto dev : v_devices) {
-				if (!dev->get_synchronized()) {
-					flag = true;
-				}
-			}
+		//wait for all devices to be synchronized
+		
+		for (auto dev : v_devices) {
+			dev->wait_synchronized();
 		}
 		
 		refnoise->set_state(0);

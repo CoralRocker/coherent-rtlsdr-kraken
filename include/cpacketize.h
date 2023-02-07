@@ -23,6 +23,7 @@ along with coherent-rtlsdr.  If not, see <https://www.gnu.org/licenses/>.
 #include <mutex>
 #include <atomic>
 #include <unistd.h>
+#include <condition_variable>
 
 struct hdr0{
 	uint32_t globalseqn;
@@ -95,8 +96,9 @@ public:
             cv.wait(lock,[this]{return ((bufferfilled.load()) || (do_exit.load()) );});
             bufferfilled = false;
         }
-            //printf("sending..\n");
-            socket.send(packetbuf0,packetlength,0);
+		
+		//printf("sending..\n");
+		socket.send(packetbuf0,packetlength,0);
             
         
 	}
