@@ -164,7 +164,7 @@ int main(int argc, char **argv)
 
 	int nfft = 8;
 
-	cl_ops   ops = {"1000",false,1024000,uint32_t(1626e6),8,1<<18,4,500,500,false,"kraken.cfg",false,false};
+	cl_ops   ops = {"1000",false,1024000,uint32_t(1626e6),8,1<<18,4,500,500,true,"kraken.cfg",false,false};
 	ops.ndev = crtlsdr::get_device_count();
 	cout << to_string(ops.ndev) << " devices found." << endl;
 	// parsecommandline(&ops,argc,argv);
@@ -207,8 +207,8 @@ int main(int argc, char **argv)
 			ops.refname = cconfigfile::get_refname(vdefs);
 		}
 		else{
-			uint32_t refindex = crtlsdr::get_index_by_serial(ops.refname);
-			for(uint32_t n=0;n<ops.ndev;n++){
+			int refindex = crtlsdr::get_index_by_serial(ops.refname);
+			for(int n=0;n<ops.ndev;n++){
 				sdrdefs d;
 				d.devindex=n;
 				d.serial  = crtlsdr::get_device_serial(n);
@@ -279,9 +279,33 @@ int main(int argc, char **argv)
 
 		//wait for all devices to be synchronized
 		
-		for (auto dev : v_devices) {
-			dev->wait_synchronized();
+		// for (auto dev : v_devices) {
+		// 	dev->wait_synchronized();
+		// }
+
+		bool syncflag = true;
+		size_t synced;
+		struct timespec ts;
+		while (syncflag) {
+			synced = 0;
+			ts.tv_sec = 1;
+			ts.tv_nsec = 0;
+			cout << '\r';
+			for (auto dev : v_devices) {
+				if (dev->get_synchronized()) {
+					synced++;
+					cout << 1 << ' ';
+				} else
+					cout << 0 << ' ';
+			}
+			cout.flush();
+			if (synced == v_devices.size())
+				syncflag = false;
+			else
+				nanosleep(&ts, nullptr);
 		}
+
+		cout << endl;
 		
 		refnoise->set_state(0);
 
@@ -323,7 +347,7 @@ int main(int argc, char **argv)
 		cout << "closing reference" <<endl;
 		delete ref_dev;
 		//delete packetize;
-		cpacketize::cleanup();
+		cpacketize::cleanup(); //<- only needed if using zmq
 		delete refnoise;
 	}
 	return 1;

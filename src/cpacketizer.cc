@@ -25,8 +25,10 @@ along with coherent-rtlsdr.  If not, see <https://www.gnu.org/licenses/>.
 int 						cpacketize::objcount=0;
 uint32_t 					cpacketize::globalseqn=0;
 std::condition_variable 	cpacketize::cv;
+#ifdef USEZMQ
 zmq::socket_t		 		*cpacketize::socket;
 zmq::context_t 				*cpacketize::context;
+#endif
 std::mutex 					cpacketize::bmutex;
 std::unique_ptr<int8_t[]>	cpacketize::packetbuf0;
 std::unique_ptr<int8_t[]>	cpacketize::packetbuf1;
@@ -39,9 +41,9 @@ uint32_t					cpacketize::blocksize=0;
 bool						cpacketize::do_exit=false;
 std::vector<std::complex<float>> cpacketize::pcorrection;
 
-
+#ifdef USEZMQ
 zmq::socket_t *debugsocket;
-
+#endif
 cpacketize::cpacketize(){
 
     objcount++; 			//this is a stupid approach. should just alloc a large buffer beforehand...realloc sparsely if need be.
@@ -56,15 +58,17 @@ cpacketize::~cpacketize(){
 
 
 void cpacketize::init(std::string address,bool noheader_,uint32_t nchannels_,uint32_t blocksize_){
+	#ifdef USEZMQ
 	context = new zmq::context_t(1);
 	socket  = new zmq::socket_t(*context,ZMQ_PUB);
 	socket->bind(address.data());
+	#endif
 	noheader = noheader_;
 	blocksize= blocksize_;
-
+	#ifdef USEZMQ
 	debugsocket = new zmq::socket_t(*context,ZMQ_PUB);
 	debugsocket->bind("tcp://*:5557");
-
+	#endif
 	packetbuf0 = std::make_unique<int8_t[]>(cpacketize::packetlength(nchannels_,blocksize_));
 	packetbuf1 = std::make_unique<int8_t[]>(cpacketize::packetlength(nchannels_,blocksize_));
 
@@ -74,12 +78,14 @@ void cpacketize::init(std::string address,bool noheader_,uint32_t nchannels_,uin
 }
 
 void cpacketize::cleanup(){
+	#ifdef USEZMQ
 	socket->close();
 	debugsocket->close();
 	delete context;
 	delete socket;
 
 	delete debugsocket;
+	#endif
 }
 
 
@@ -105,7 +111,7 @@ void cpacketize::resize_buffers(uint32_t N, uint32_t L){
 		pcorrection.resize(N,std::complex<float>(0.0f,0.0f));
 	}
 }
-
+#ifdef USEZMQ
 int cpacketize::send(){
 	if (!noheader){
 		//fill static header. block readcounts filled by calls to write:
@@ -127,6 +133,38 @@ int cpacketize::send(){
     debugsocket->send(pcorrection.data(),objcount*sizeof(std::complex<float>),0);
     return 0;
 }
+#else
+int cpacketize::send() {
+	if (!noheader){
+		//fill static header. block readcounts filled by calls to write:
+		hdr0 *hdr 		= (hdr0 *) packetbuf0.get();
+		hdr->globalseqn	= globalseqn++;
+		hdr->N 			= objcount; //nchannels;
+		hdr->L 			= blocksize >> 1;
+		hdr->unused 	= 0;
+		//std::cout << "sending packet: "<<std::to_string(hdr->N) <<"x" << std::to_string(hdr->L) << "header " << std::to_string(noheader) << std::endl;
+	}
+		
+	{
+	    std::unique_lock<std::mutex> lock(bmutex);
+	    cv.wait(lock,[]{return ((bufferfilled) || (do_exit));});
+	    bufferfilled = false;
+	}
+	//https://stackoverflow.com/questions/20619236/how-to-get-utc-time
+	char fname[200];
+	time_t t = time(nullptr);
+    struct tm *tmp;
+    const char* fmt = "%d%b%y_%T_%z.bin";
+	tmp = gmtime(&t);
+	strftime(fname, sizeof(fname), fmt, tmp);
+
+	std::ofstream ofs(fname, std::ios::binary);
+	ofs.write((char*)packetbuf1.get(), packetlen);
+	ofs.close();
+
+    return 0;
+}
+#endif
 
 int cpacketize::writedebug(uint32_t channeln,std::complex<float> p){
 	pcorrection[channeln] = p;

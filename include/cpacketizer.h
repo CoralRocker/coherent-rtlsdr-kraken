@@ -18,7 +18,6 @@ along with coherent-rtlsdr.  If not, see <https://www.gnu.org/licenses/>.
 #ifndef PACKETIZEH
 #define PACKETIZEH
 //#include <stdint.h>
-#include <zmq.hpp>
 #include <string>
 #include <mutex>
 #include <atomic>
@@ -27,8 +26,17 @@ along with coherent-rtlsdr.  If not, see <https://www.gnu.org/licenses/>.
 #include <complex>
 #include <utility>
 
-//byte-size buffers are static, thus, when the first object of class packetize is created
+// #define USEZMQ
 
+#ifdef USEZMQ
+#include <zmq.hpp>
+#else
+#include <fstream>
+#include <time.h>
+#include <vector>
+#include <cstring>
+#endif
+//byte-size buffers are static, thus, when the first object of class packetize is created
 struct hdr0{
 	uint32_t globalseqn;
 	uint32_t N;
@@ -39,8 +47,10 @@ struct hdr0{
 
 class cpacketize{
 	static int 						objcount;
+	#ifdef USEZMQ
 	static zmq::context_t 			*context;
 	static zmq::socket_t  			*socket;
+	#endif
 	static std::mutex	  			bmutex;
 	static std::condition_variable 	cv;
 	static bool 					noheader;
