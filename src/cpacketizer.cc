@@ -105,8 +105,8 @@ void cpacketize::resize_buffers(uint32_t N, uint32_t L){
 	size_t plen = packetlength(N,L);
 	{//lock, switch pointers, delete, release lock
 		std::lock_guard<std::mutex> lock(bmutex);
-		packetbuf0 = std::make_unique<int8_t[]>(cpacketize::packetlength(N,L));
-		packetbuf1 = std::make_unique<int8_t[]>(cpacketize::packetlength(N,L));
+		packetbuf0 = std::make_unique<int8_t[]>(plen);
+		packetbuf1 = std::make_unique<int8_t[]>(plen);
 
 		pcorrection.resize(N,std::complex<float>(0.0f,0.0f));
 	}
