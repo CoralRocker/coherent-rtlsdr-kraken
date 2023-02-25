@@ -96,9 +96,9 @@ void cpacketize::request_exit(){
 
 size_t cpacketize::packetlength(uint32_t N,uint32_t L){
 		if (noheader)
-			return (2*N*L);
+			return (N*L);
 		else
-			return (16 + 4*N) + 2*N*L;
+			return (16 + 4*N) + N*L;
 }
 
 void cpacketize::resize_buffers(uint32_t N, uint32_t L){
