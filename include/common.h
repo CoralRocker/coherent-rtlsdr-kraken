@@ -60,9 +60,10 @@ public:
         rp = 0;
     	N=n;
     	L=l;
-
+#ifndef USELIBRTLSDRBUFS
     	int alignment = volk_get_alignment();
-    	for (int i=0;i<N;++i){
+#endif
+    	for (uint32_t i=0;i<N;++i){
             readcnt[i]=0;
             timestamp[i]=0;
 

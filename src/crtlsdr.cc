@@ -30,7 +30,7 @@ void crtlsdr::start(barrier *b){
 }
 
 void crtlsdr::startcontrol(){
-	//controller->start();
+	controller->start();
 }
 
 void crtlsdr::stop(){

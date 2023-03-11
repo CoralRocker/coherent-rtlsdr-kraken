@@ -70,7 +70,7 @@ std::complex<float> csdrdevice::est_phasecorrect(const lv_32fc_t *ref){
 
 float csdrdevice::est_PAPR(const lv_32fc_t *ref){
 
-
+	return -1;
 }
 
 std::complex<float> csdrdevice::get_phasecorrect(){
