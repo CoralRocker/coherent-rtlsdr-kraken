@@ -259,7 +259,8 @@ void ccoherent::threadf(ccoherent *ctx){
 			//std::unique_lock<std::mutex> lock(ctx->devices->m);
 			//std::scoped_lock(ctx->devices->m);
 			//ctx->devices->lock();
-			for(auto *d: *ctx->devices){
+			for (int i = 0; i < ctx->devices->size(); i++) {
+				csdrdevice* d = (*ctx->devices)[i];
 				int8_t *ptr = d->read(); // this is the culprit for the hang...
 				if(d->is_ready()){
 					std::complex<float> *sfloat = (std::complex<float> *) d->convtofloat();
@@ -274,10 +275,9 @@ void ccoherent::threadf(ccoherent *ctx){
 					
 					d->phasecorrect();
 
-					//d->packetize.write(c,d->get_readcnt(),ptr);
-					d->packetize.write(c,d->get_readcntbuf(),sfloat);
-					d->packetize.writedebug(c,d->get_phasecorrect());
-					c++;
+					d->packetize.write(i+1,d->get_readcnt(),ptr);
+					// d->packetize.write(c,d->get_readcntbuf(),sfloat);
+					d->packetize.writedebug(i+1,d->get_phasecorrect());
 					d->consume();
 				}
 			}

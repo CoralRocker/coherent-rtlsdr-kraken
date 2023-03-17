@@ -164,7 +164,7 @@ int main(int argc, char **argv)
 
 	int nfft = 8;
 
-	cl_ops   ops = {"1000",false,1024000,uint32_t(1626e6),4,1<<15,4,500,500,true,"kraken.cfg",true,false};
+	cl_ops   ops = {"1000",false,1024000,uint32_t(1626e6),8,1<<15,4,500,500,true,"kraken.cfg",true,false};
 	ops.ndev = crtlsdr::get_device_count();
 	cout << to_string(ops.ndev) << " devices found." << endl;
 	// parsecommandline(&ops,argc,argv);
@@ -307,7 +307,7 @@ int main(int argc, char **argv)
 
 		cout << endl;
 		
-		refnoise->set_state(0);
+		// refnoise->set_state(0);
 
 		cout << "synchronized" << endl;
 
