@@ -307,7 +307,7 @@ int main(int argc, char **argv)
 
 		cout << endl;
 		
-		// refnoise->set_state(0);
+		refnoise->set_state(0);
 
 		cout << "synchronized" << endl;
 

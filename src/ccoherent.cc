@@ -254,12 +254,12 @@ void ccoherent::threadf(ccoherent *ctx){
 		ctx->refdev->consume();
 		//ctx->queuelag(ctx->refdev,true);
 
-		int c=1;
+		// int c=1;
 		{
 			//std::unique_lock<std::mutex> lock(ctx->devices->m);
 			//std::scoped_lock(ctx->devices->m);
 			//ctx->devices->lock();
-			for (int i = 0; i < ctx->devices->size(); i++) {
+			for (unsigned int i = 0; i < ctx->devices->size(); i++) {
 				csdrdevice* d = (*ctx->devices)[i];
 				int8_t *ptr = d->read(); // this is the culprit for the hang...
 				if(d->is_ready()){
@@ -270,13 +270,13 @@ void ccoherent::threadf(ccoherent *ctx){
 					}
 
 					if (ctx->refnoise->isenabled()){
-						std::complex<float> p = d->est_phasecorrect(ctx->refdev->get_sptr()+(ctx->refdev->get_blocksize()>>1));
+						std::complex<float> p = d->est_phasecorrect(ctx->refdev->get_sptr()+(ctx->refdev->get_blocksize()>>1));//
 					}
 					
 					d->phasecorrect();
 
-					d->packetize.write(i+1,d->get_readcnt(),ptr);
-					// d->packetize.write(c,d->get_readcntbuf(),sfloat);
+					// d->packetize.write(i+1,d->get_readcnt(),ptr);
+					d->packetize.write(i+1,d->get_readcntbuf(),(std::complex<float>*)d->get_sptr());
 					d->packetize.writedebug(i+1,d->get_phasecorrect());
 					d->consume();
 				}

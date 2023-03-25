@@ -96,9 +96,9 @@ void cpacketize::request_exit(){
 
 size_t cpacketize::packetlength(uint32_t N,uint32_t L){
 		if (noheader)
-			return 2*(N*L);
+			return (N*L);
 		else
-			return (16 + 4*N) + 2*N*L;
+			return (16 + 4*N) + N*L;
 }
 
 void cpacketize::resize_buffers(uint32_t N, uint32_t L){
@@ -202,7 +202,7 @@ int cpacketize::write(uint32_t channeln,uint32_t readcnt,std::complex<float> *in
         loc = (sizeof(hdr0)+objcount*sizeof(uint32_t)) + channeln*blocksize;
     }
     else{
-        loc = channeln*blocksize;
+        loc = channeln*(blocksize);
     }
     cdsp::convto8bit((std::complex<int8_t> *) (packetbuf0.get()+loc),in, (blocksize>>1));
     //std::memcpy((int8_t *) (packetbuf0.get() +loc),rp,blocksize);
