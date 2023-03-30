@@ -164,7 +164,7 @@ int main(int argc, char **argv)
 
 	int nfft = 8;
 
-	cl_ops   ops = {"1000",false,1024000,uint32_t(1626e6),8,1<<15,4,500,500,true,"kraken.cfg",true,false};
+	cl_ops   ops = {"1000",false,1024000,uint32_t(1626e6),8,1<<15,4,496,496,true,"kraken.cfg",true,false};
 	ops.ndev = crtlsdr::get_device_count();
 	cout << to_string(ops.ndev) << " devices found." << endl;
 	// parsecommandline(&ops,argc,argv);
@@ -218,7 +218,7 @@ int main(int argc, char **argv)
 
 		}
 
-		crefsdr* ref_dev = new crefsdr(ops.asyncbufn,ops.blocksize,ops.fs,ops.fc);
+		crefsdr* ref_dev = new crefsdr(ops.asyncbufn,ops.blocksize,ops.fs,ops.fc,ops.gain);
 		cout << "opening reference device" <<endl;
 		
 		crefnoise * refnoise = new crefnoise(ref_dev);
@@ -231,7 +231,7 @@ int main(int argc, char **argv)
 		cout << "opening signal devices:";
 
 		for (auto n: vdefs){
-			v_devices.push_back(new crtlsdr(ops.asyncbufn,ops.blocksize,ops.fs,ops.fc)); //this must be made std::unique_ptr or std::shared_ptr...
+			v_devices.push_back(new crtlsdr(ops.asyncbufn,ops.blocksize,ops.fs,ops.fc,ops.gain)); //this must be made std::unique_ptr or std::shared_ptr...
 			if (v_devices.back()->open(n.serial)){
 				delete v_devices.back();
 				v_devices.pop_back();
@@ -283,29 +283,29 @@ int main(int argc, char **argv)
 		// 	dev->wait_synchronized();
 		// }
 
-		bool syncflag = true;
-		size_t synced;
-		struct timespec ts;
-		while (syncflag) {
-			synced = 0;
-			ts.tv_sec = 1;
-			ts.tv_nsec = 0;
-			cout << '\r';
-			for (auto dev : v_devices) {
-				if (dev->get_synchronized()) {
-					synced++;
-					cout << 1 << ' ';
-				} else
-					cout << 0 << ' ';
-			}
-			cout.flush();
-			if (synced == v_devices.size())
-				syncflag = false;
-			else
-				nanosleep(&ts, nullptr);
-		}
+		// bool syncflag = true;
+		// size_t synced;
+		// struct timespec ts;
+		// while (syncflag) {
+		// 	synced = 0;
+		// 	ts.tv_sec = 1;
+		// 	ts.tv_nsec = 0;
+		// 	cout << '\r';
+		// 	for (auto dev : v_devices) {
+		// 		if (dev->get_synchronized()) {
+		// 			synced++;
+		// 			cout << 1 << ' ';
+		// 		} else
+		// 			cout << 0 << ' ';
+		// 	}
+		// 	cout.flush();
+		// 	if (synced == v_devices.size())
+		// 		syncflag = false;
+		// 	else
+		// 		nanosleep(&ts, nullptr);
+		// }
 
-		cout << endl;
+		// cout << endl;
 		
 		refnoise->set_state(0);
 

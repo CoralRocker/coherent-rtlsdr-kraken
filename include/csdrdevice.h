@@ -251,8 +251,7 @@ public:
 	int8_t *read();
 	void consume(){s8bit.consume();};
 
-	crtlsdr(uint32_t asyncbufn_, uint32_t blocksize_,uint32_t samplerate_, uint32_t fcenter_) : csdrdevice(asyncbufn_,blocksize_,samplerate_,fcenter_), s8bit(asyncbufn_,blocksize_){
-		rfgain   = 500;
+	crtlsdr(uint32_t asyncbufn_, uint32_t blocksize_,uint32_t samplerate_, uint32_t fcenter_, uint32_t rfgain) : csdrdevice(asyncbufn_,blocksize_,samplerate_,fcenter_), s8bit(asyncbufn_,blocksize_), rfgain(rfgain){
 		//int alignment = volk_get_alignment();
 
 		//s8bit = new cbuffer[asyncbufn]; //{cbuffer(block_size)}
@@ -283,7 +282,7 @@ public:
 	const lv_32fc_t* get_sptr();
 
 	void start(barrier *b);
-	crefsdr(uint32_t asyncbufn_, uint32_t blocksize_,uint32_t samplerate_, uint32_t fcenter_) : crtlsdr(asyncbufn_,blocksize_,samplerate_,fcenter_){};
+	crefsdr(uint32_t asyncbufn_, uint32_t blocksize_,uint32_t samplerate_, uint32_t fcenter_, uint32_t rfgain) : crtlsdr(asyncbufn_,blocksize_,samplerate_,fcenter_, rfgain){};
 	//~crefsdr(){};
 };
 
