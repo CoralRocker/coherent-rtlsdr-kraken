@@ -55,7 +55,7 @@ void crtlsdr::asynch_threadf(crtlsdr *d){ //a static func
 	if (ret<0)
 		std::cerr << "rtlsdr_read_async failed for #" << std::to_string(d->devnum) << std::endl;
 	else
-		std::cerr << "asynch_thread #" << std::to_string(d->devnum) << "exited" << std::endl;
+		std::cerr << "asynch_thread #" << std::to_string(d->devnum) << " exited" << std::endl;
 }
 
 void crtlsdr::asynch_callback(unsigned char *buf, uint32_t len, void *ctx)

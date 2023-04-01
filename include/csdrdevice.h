@@ -15,8 +15,7 @@ You should have received a copy of the GNU General Public License
 along with coherent-rtlsdr.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef CSDRDEVICEH
-#define CSDRDEVICEH
+#pragma once
 
 #include <rtl-sdr.h>
 #include <chrono>
@@ -285,5 +284,3 @@ public:
 	crefsdr(uint32_t asyncbufn_, uint32_t blocksize_,uint32_t samplerate_, uint32_t fcenter_, uint32_t rfgain) : crtlsdr(asyncbufn_,blocksize_,samplerate_,fcenter_, rfgain){};
 	//~crefsdr(){};
 };
-
-#endif

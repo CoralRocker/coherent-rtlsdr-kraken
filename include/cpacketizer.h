@@ -15,8 +15,7 @@ You should have received a copy of the GNU General Public License
 along with coherent-rtlsdr.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef PACKETIZEH
-#define PACKETIZEH
+#pragma once
 //#include <stdint.h>
 #include <string>
 #include <mutex>
@@ -86,4 +85,3 @@ public:
 
 	int notifysend();
 };
-#endif

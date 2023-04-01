@@ -283,29 +283,30 @@ int main(int argc, char **argv)
 		// 	dev->wait_synchronized();
 		// }
 
-		// bool syncflag = true;
-		// size_t synced;
-		// struct timespec ts;
-		// while (syncflag) {
-		// 	synced = 0;
-		// 	ts.tv_sec = 1;
-		// 	ts.tv_nsec = 0;
-		// 	cout << '\r';
-		// 	for (auto dev : v_devices) {
-		// 		if (dev->get_synchronized()) {
-		// 			synced++;
-		// 			cout << 1 << ' ';
-		// 		} else
-		// 			cout << 0 << ' ';
-		// 	}
-		// 	cout.flush();
-		// 	if (synced == v_devices.size())
-		// 		syncflag = false;
-		// 	else
-		// 		nanosleep(&ts, nullptr);
-		// }
+		bool syncflag = true;
+		size_t synced;
+		struct timespec ts;
+		while (syncflag) {
+			synced = 0;
+			ts.tv_sec = 1;
+			ts.tv_nsec = 0;
+			cout << '\r';
+			for (auto dev : v_devices) {
+				if (dev->get_synchronized()) {
+					synced++;
+					cout << 1 << ' ';
+				} else
+					cout << 0 << ' ';
+				// cout << dev->get_phasecorrect() << ' ';
+			}
+			cout.flush();
+			if (synced == v_devices.size())
+				syncflag = false;
+			else
+				nanosleep(&ts, nullptr);
+		}
 
-		// cout << endl;
+		cout << endl;
 		
 		refnoise->set_state(0);
 

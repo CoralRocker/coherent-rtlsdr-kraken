@@ -15,8 +15,7 @@ You should have received a copy of the GNU General Public License
 along with coherent-rtlsdr.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef PACKETIZEH
-#define PACKETIZEH
+#pragma once
 //#include <stdint.h>
 #include <zmq.hpp>
 #include <string>
@@ -81,68 +80,10 @@ public:
 		do_exit = true;
 	};
 
-	int send(){
-		if (!noheader){
-			//fill static header. block readcounts filled by calls to write:
-			hdr0 *hdr 		= (hdr0 *) packetbuf0;
-			hdr->globalseqn	= globalseqn++;
-			hdr->N 			= nchannels;
-			hdr->L 			= blocksize;
-			hdr->unused 	= 0;
-		}
-		
-		{
-            std::unique_lock<std::mutex> lock(bmutex);
-            cv.wait(lock,[this]{return ((bufferfilled.load()) || (do_exit.load()) );});
-            bufferfilled = false;
-        }
-		
-		//printf("sending..\n");
-		socket.send(packetbuf0,packetlength,0);
-            
-        
-	}
+	int send();
 
 	//the idea is that each thread could call this method from it's own context, as we're writing to separate locations
-	int write(uint32_t channeln,uint32_t readcnt,int8_t *rp){
-
-        
-    
-        uint32_t loc;
-
-        if (!noheader){
-            //fill dynamic size part of header, write readcounts
-            *(packetbuf0 + sizeof(hdr0)+channeln)=readcnt;
-            loc = (sizeof(hdr0)+nchannels*sizeof(uint32_t)) + channeln*blocksize;
-        }
-        else{
-            loc = channeln*blocksize;
-        }
-
-        //copy data
-        memcpy((int8_t *) (packetbuf0+loc),rp,blocksize);
-        
-        if(writecnt--==0)
-        {
-        	std::unique_lock<std::mutex> lock(bmutex);
-
-        	int8_t *tmp=packetbuf0;
-            packetbuf0=packetbuf1;
-            packetbuf1=tmp;
-
-            writecnt = nchannels;
-        
-        	bufferfilled = true;
-        	lock.unlock();
-
-        	cv.notify_one();	
-        }
-        
-        
-	}
+	int write(uint32_t channeln,uint32_t readcnt,int8_t *rp);
 
 
 };
-
-
-#endif

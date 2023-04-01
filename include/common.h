@@ -15,8 +15,7 @@ You should have received a copy of the GNU General Public License
 along with coherent-rtlsdr.  If not, see <https://www.gnu.org/licenses/>.
 */
 
-#ifndef COMMONH
-#define COMMONH
+#pragma once
 
 #include <condition_variable>
 #include <mutex>
@@ -112,40 +111,40 @@ public:
 #endif
 	}
 */
-void setbufferptr(uint8_t *buffer,uint32_t rcnt)
-{
-    timestamp[((wp) & (N-1))] = std::chrono::high_resolution_clock::now().time_since_epoch().count();
-    readcnt[((wp) & (N-1))] = rcnt;
-#ifdef USELIBRTLSDRBUFS
-    ptr[((wp) & (N-1))] = (int8_t *) buffer;
-#endif
-    cdsp::convtosigned(buffer, (uint8_t *) ptr[wp++ & (N-1)],L);
-};
-
-int8_t *getbufferptr(){
-#ifndef USELIBRTLSDRBUFS        
-        return ptr[rp & (N-1)];
-#else
-        //we might return a null pointer during the first run through the circular pointer array. Hack to avoid that...
-        return ptr[rp & (N-1)] != NULL ? ptr[rp & (N-1)] : ptr[0]; 
-#endif
+    void setbufferptr(uint8_t *buffer,uint32_t rcnt)
+    {
+        timestamp[((wp) & (N-1))] = std::chrono::high_resolution_clock::now().time_since_epoch().count();
+        readcnt[((wp) & (N-1))] = rcnt;
+    #ifdef USELIBRTLSDRBUFS
+        ptr[((wp) & (N-1))] = (int8_t *) buffer;
+    #endif
+        cdsp::convtosigned(buffer, (uint8_t *) ptr[wp++ & (N-1)],L);
     }
 
-uint32_t get_rcnt(){
-    return readcnt[rp & (N-1)];
-}
+    int8_t *getbufferptr(){
+    #ifndef USELIBRTLSDRBUFS        
+            return ptr[rp & (N-1)];
+    #else
+            //we might return a null pointer during the first run through the circular pointer array. Hack to avoid that...
+            return ptr[rp & (N-1)] != NULL ? ptr[rp & (N-1)] : ptr[0]; 
+    #endif
+        }
 
-void consume(){
-    rp++;
-}
+    uint32_t get_rcnt(){
+        return readcnt[rp & (N-1)];
+    }
+
+    void consume(){
+        rp++;
+    }
 
 
-int8_t *getbufferptr(uint32_t rcnt){
-#ifndef USELIBRTLSDRBUFS        
-        return ptr[rcnt % N];
-#else
-        return ptr[rcnt % N] != NULL ? ptr[rcnt % N] : ptr[0];
-#endif
+    int8_t *getbufferptr(uint32_t rcnt){
+    #ifndef USELIBRTLSDRBUFS        
+            return ptr[rcnt % N];
+    #else
+            return ptr[rcnt % N] != NULL ? ptr[rcnt % N] : ptr[0];
+    #endif
 }
 };
 
@@ -289,4 +288,3 @@ public:
 
 bool is_zeros(uint32_t *p,int n);
 
-#endif
