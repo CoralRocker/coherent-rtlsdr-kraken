@@ -49,7 +49,7 @@ void crtlsdr::asynch_threadf(crtlsdr *d){ //a static func
 	
 	ret = rtlsdr_reset_buffer(d->dev);
 	if (ret<0)
-		std::cerr << "rtlsdr_reset_buffer failed for#" << std::to_string(d->devnum) << std::endl;
+		std::cerr << "rtlsdr_reset_buffer failed for #" << std::to_string(d->devnum) << std::endl;
 
 	ret = rtlsdr_read_async(d->dev,crtlsdr::asynch_callback, (void *)d, d->asyncbufn, d->blocksize);
 	if (ret<0)
@@ -160,17 +160,17 @@ int crtlsdr::set_tunergain(uint32_t gain){
 	return rtlsdr_set_tuner_gain(dev, gain);
 }
 
-int crtlsdr::set_tunergainmode(uint32_t mode){
+int crtlsdr::set_tunergainmode(uint32_t mode) {
 	return rtlsdr_set_tuner_gain_mode(dev, mode);
 }
 
-int crtlsdr::set_correction_f(float f){
+int crtlsdr::set_correction_f(float f) {
 	//std::cout << "set correction on dev " << std::to_string(devnum) << ":" << std::to_string((long int )dev) << std::endl;
 	return ((dev!=NULL) && (!do_exit)) ? rtlsdr_set_sample_freq_correction_f(dev,f) : -1;
 }
 
 
-int8_t* crtlsdr::swapbuffer(uint8_t *b){
+int8_t* crtlsdr::swapbuffer(uint8_t *b) {
 	//auto t = std::chrono::high_resolution_clock::now();
 	//auto t_ns= (std::chrono::time_point_cast<std::chrono::nanoseconds>(t)).time_since_epoch();
 
@@ -178,6 +178,7 @@ int8_t* crtlsdr::swapbuffer(uint8_t *b){
 		{
 			    std::unique_lock<std::mutex> lock(mtx);
 				s8bit.setbufferptr(b,get_readcnt()); //postincremented
+				// std::cout << int(b[0]) << std::endl;
 				inc_readcnt(); //was included in mutex scope.
 
 		
@@ -192,8 +193,8 @@ int8_t* crtlsdr::swapbuffer(uint8_t *b){
 	return s8bit.getbufferptr();
 }
 
-int8_t* crtlsdr::read(){
-	if (streaming){
+int8_t* crtlsdr::read() {
+	if (streaming) {
 		std::unique_lock<std::mutex> lock(mtx);
 		cv.wait(lock, [this]{return (newdata.load()>0);});
 		newdata--; //false;
@@ -202,33 +203,33 @@ int8_t* crtlsdr::read(){
 	return s8bit.getbufferptr(); // double return statements, in case streaming is false.
 }
 
-const std::complex<float> *crtlsdr::convtofloat(){
+const std::complex<float> *crtlsdr::convtofloat() {
 	return cdsp::convtofloat(sfloat,s8bit.getbufferptr(),blocksize);
 }
 
 
-const std::complex<float> *crtlsdr::convtofloat(const std::complex<float> *p){
+const std::complex<float> *crtlsdr::convtofloat(const std::complex<float> *p) {
 	return cdsp::convtofloat(p,s8bit.getbufferptr(),blocksize);
 }
 
 
-const std::complex<float> *crefsdr::convtofloat(){
+const std::complex<float> *crefsdr::convtofloat() {
 	cdsp::convtofloat(sfloat+(blocksize>>1),s8bit.getbufferptr(),blocksize);
 	return sfloat + (blocksize>>1);
 }
 
-const std::complex<float> *crefsdr::convtofloat(const std::complex<float> *p){
+const std::complex<float> *crefsdr::convtofloat(const std::complex<float> *p) {
 	cdsp::convtofloat(p+(blocksize>>1),s8bit.getbufferptr(),blocksize);
 	return p + (blocksize >> 1);
 }
 
 void crefsdr::start(barrier *b){
 	startbarrier = b;
-	thread = std::thread(crtlsdr::asynch_threadf,this);
 	streaming = true;
+	thread = std::thread(crtlsdr::asynch_threadf,this);
 	//controller->start();
 }
 
 const std::complex<float>* crefsdr::get_sptr(){
-	return sfloat;// + (blocksize >> 1);
+	return sfloat;// (blocksize >> 1);
 }

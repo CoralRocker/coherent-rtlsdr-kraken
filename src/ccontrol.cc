@@ -43,21 +43,21 @@ double realfs(uint32_t requestedfs){
 	return (rtl_xtal * TWO_POW(22)) / real_fsratio;
 }
 
-void ccontrol::start(){
+void ccontrol::start() {
 	do_exit= false;
 
 	thread = std::thread(&ccontrol::threadf, this);
 }
 
-void ccontrol::request_exit(){
+void ccontrol::request_exit() {
 	do_exit=true;
 }
 
-void ccontrol::join(){
+void ccontrol::join() {
 	thread.join();
 }
 
-void fillts(struct timespec* t,double ts){
+void fillts(struct timespec* t,double ts) {
 	long int tnsec = ts*1e9;
 	if (ts>1.0){
 		t->tv_sec = floor(ts);
@@ -70,12 +70,12 @@ void fillts(struct timespec* t,double ts){
 	}
 }
 
-float descent(float lag){
+float descent(float lag) {
 	//return fabs(maxppm*tanh(lag/scale));
 	return maxppm*tanh(lag/scale); //EDIT
 }
 
-void ccontrol::threadf(ccontrol *ctx){
+void ccontrol::threadf(ccontrol *ctx) {
 	
 	struct timespec tsp = {1,0L};
 	long int        tns = 0L;
@@ -85,8 +85,8 @@ void ccontrol::threadf(ccontrol *ctx){
 	usleep(16*32800); //UGLY! //this should be resolved: if this wait is removed, segfault happens...
 	//ctx->dev->wait_synchronized(); // check if wait before the loop resolves...nope.
 
-	while(!ctx->do_exit){
-		if(!ctx->dev->wait_synchronized()){
+	while(!ctx->do_exit) {
+		if(!ctx->dev->wait_synchronized()) {
 
 			ctx->dev->requestfftblocking(); //ask for a new fft.
 			
@@ -95,8 +95,8 @@ void ccontrol::threadf(ccontrol *ctx){
 			float	  fs = realfs(ctx->dev->get_samplerate());
 			float fcorr;
 
-			//std::cout << "lag is" << std::to_string(lag) << std::endl;
-			if (fabs(lag)>sync_threshold){ //should we check when the estimate is calculated ?
+			// std::cout << "lag is" << std::to_string(lag) << std::endl;
+			if (fabs(lag)>sync_threshold) { //should we check when the estimate is calculated ?
 				
 				float      p = descent(lag);
 				double	   t = frac_t*fabs(lag/(p*fs)); //time to spend at altered samplerate
@@ -113,10 +113,12 @@ void ccontrol::threadf(ccontrol *ctx){
 				//if (errno==EINTR)
 				//	cout << "we've been interrupted" << endl;
 				ctx->dev->set_correction_f(0.0f);
-			}
-			else{
+
+			} else {
+
 				ctx->dev->set_correction_f(0.0f);
 				ctx->dev->set_synchronized(true);
+
 			}
 		}
 	}

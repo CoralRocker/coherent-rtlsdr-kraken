@@ -111,14 +111,14 @@ public:
 #endif
 	}
 */
-    void setbufferptr(uint8_t *buffer,uint32_t rcnt)
+    void setbufferptr(uint8_t *buffer, uint32_t rcnt)
     {
         timestamp[((wp) & (N-1))] = std::chrono::high_resolution_clock::now().time_since_epoch().count();
         readcnt[((wp) & (N-1))] = rcnt;
     #ifdef USELIBRTLSDRBUFS
         ptr[((wp) & (N-1))] = (int8_t *) buffer;
     #endif
-        cdsp::convtosigned(buffer, (uint8_t *) ptr[wp++ & (N-1)],L);
+        cdsp::convtosigned(buffer, (uint8_t *) ptr[wp++ & (N-1)], L);
     }
 
     int8_t *getbufferptr(){

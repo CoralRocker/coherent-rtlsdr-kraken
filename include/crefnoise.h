@@ -31,9 +31,9 @@ public:
 		std::cout << "noise set to " << s << std::endl;
 		enabled = s;
 		if (s)
-			rtlsdr_set_bias_tee(dev->dev, 1);
+			rtlsdr_set_bias_tee_gpio(dev->dev, 0, 1);
 		else
-			rtlsdr_set_bias_tee(dev->dev, 0);
+			rtlsdr_set_bias_tee_gpio(dev->dev, 0, 0);
 		
 	};
 
@@ -45,6 +45,7 @@ public:
 		this->dev = dev;
 
 	};
+	
 	~crefnoise(){
 		
 	};

@@ -22,14 +22,14 @@ along with coherent-rtlsdr.  If not, see <https://www.gnu.org/licenses/>.
 #include <mutex>
 
 #ifdef RASPBERRYPI
-int uint32log2(uint32_t k){
+int uint32log2(uint32_t k) {
 	int i=0;
 	for (i=-1;k>=1;k>>=1,++i);
 	return i;
 }
 #endif
 
-ccoherent::ccoherent(crefsdr* refdev_,lvector<csdrdevice*> *devvec_,crefnoise* refnoise_, int nfft_){
+ccoherent::ccoherent(crefsdr* refdev_,lvector<csdrdevice*> *devvec_,crefnoise* refnoise_, int nfft_) {
 	refdev =refdev_;
 	devices=devvec_;
 	refnoise=refnoise_;
@@ -94,7 +94,7 @@ ccoherent::ccoherent(crefsdr* refdev_,lvector<csdrdevice*> *devvec_,crefnoise* r
 #endif
 }
 
-ccoherent::~ccoherent(){
+ccoherent::~ccoherent() {
 	if (thread.joinable()) thread.join();
 
 	volk_free(smagsqr);
@@ -112,15 +112,15 @@ ccoherent::~ccoherent(){
 
 }
 
-void ccoherent::clearlagqueue(){
+void ccoherent::clearlagqueue() {
 	lagqueue.clear();
 }
 
-size_t ccoherent::lagqueuesize(){
+size_t ccoherent::lagqueuesize() {
 	return lagqueue.size();
 }
 
-void ccoherent::queuelag(csdrdevice *d){
+void ccoherent::queuelag(csdrdevice *d) {
 	if (lagqueue.size()<nfft){
 		/*printf("sfloatbase:%p\n",sfloat);
 		printf("copy from: %p\n",d->get_sptr());
@@ -140,7 +140,7 @@ void ccoherent::queuelag(csdrdevice *d){
 		
 	}
 }
-void ccoherent::queuelag(csdrdevice *d,bool refc){
+void ccoherent::queuelag(csdrdevice *d,bool refc) {
 	if (lagqueue.size()<nfft){
 		//std::memcpy((sfloat+lagqueue.size()*blocksize), d->get_sptr(),sizeof(std::complex<float>)*(blocksize)); //fix me, half of the copy is zeros.
 		if (refc)
@@ -151,8 +151,7 @@ void ccoherent::queuelag(csdrdevice *d,bool refc){
 	}
 }
 
-void ccoherent::computelag()
-{
+void ccoherent::computelag() {
 
 #ifdef RASPBERRYPI
 	
@@ -174,7 +173,7 @@ void ccoherent::computelag()
 	cdsp::fft(sfft,sfloat,&fftscheme); //nfft fft:s
 
 	//multiply each with ref
-	for(int k=1;k<lagqueue.size();k++){
+	for(int k=1;k<lagqueue.size();k++) {
 		cdsp::conjugatemul(sconv+k*blocksize,sfft+k*blocksize,sfft,blocksize);
 	}
 
@@ -186,7 +185,7 @@ void ccoherent::computelag()
 	//cdsp::magsquared(smagsqr,sifft,blocksize*(nfft));
 #endif
 
-	for(int k=1;k<lagqueue.size();k++){
+	for(int k=1;k<lagqueue.size();k++) {
 		float    lag=0.0f;
 		float    D=0.0f,a=0.0f,b=0.0f;
 		uint32_t idx = cdsp::indexofmax(smagsqr + k*blocksize,blocksize);
@@ -238,13 +237,13 @@ void ccoherent::computelag()
 	//	cout << "ref is zeros" <<endl;
 }
 
-void ccoherent::join(){
+void ccoherent::join() {
 	thread.join();
 }
 
-void ccoherent::threadf(ccoherent *ctx){
+void ccoherent::threadf(ccoherent *ctx) {
 
-	while(!ctx->do_exit){
+	while(!ctx->do_exit) {
 		//read reference channel and perform fft:
 		ctx->clearlagqueue();
 		int8_t *refsptr = ctx->refdev->read();
@@ -264,12 +263,12 @@ void ccoherent::threadf(ccoherent *ctx){
 				int8_t *ptr = d->read(); // this is the culprit for the hang...
 				if(d->is_ready()){
 					std::complex<float> *sfloat = (std::complex<float> *) d->convtofloat();
-					if (d->is_lagrequested()){
+					if (d->is_lagrequested()) {
 						ctx->queuelag(d);
 						//ctx->queuelag(d,false);
 					}
 
-					if (ctx->refnoise->isenabled()){
+					if (ctx->refnoise->isenabled()) {
 						std::complex<float> p = d->est_phasecorrect(ctx->refdev->get_sptr()+(ctx->refdev->get_blocksize()>>1));//
 					}
 					
@@ -277,11 +276,11 @@ void ccoherent::threadf(ccoherent *ctx){
 
 					// d->packetize.write(i+1,d->get_readcnt(),ptr);
 					d->packetize.write(i+1,d->get_readcntbuf(),(std::complex<float>*)d->get_sptr());
-					d->packetize.writedebug(i+1,d->get_phasecorrect());
+					// d->packetize.writedebug(i+1,d->get_phasecorrect());
 					d->consume();
 				}
 			}
-			if (ctx->lagqueuesize()>1){
+			if (ctx->lagqueuesize()>1) {
 				ctx->computelag();
 				//cout << "firing lag computation!" << endl;
 			}
